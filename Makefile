@@ -27,7 +27,7 @@ help:
 FORCE: ;
 
 bin/%: cmd/% FORCE
-	go build $(GO_BUILD_FLAGS) -o $@ ./$<
+	CGO_ENABLED=0 go build $(GO_BUILD_FLAGS) -o $@ ./$<
 
 .PHONY: download
 download: ## download dependencies via go mod
@@ -35,3 +35,9 @@ download: ## download dependencies via go mod
 
 .PHONY: build
 build: $(addprefix bin/,$(COMMANDS)) ## builds binaries
+
+.PHONY: image
+image: ## build the binary in a docker image
+	docker build \
+		-t "philipssoftware/spiffe-vault:$(GIT_TAG)" \
+		-t "philipssoftware/spiffe-vault:$(GIT_HASH)" .
