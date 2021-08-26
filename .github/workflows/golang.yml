@@ -79,7 +79,7 @@ jobs:
           version: latest
           args: release --rm-dist
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           LDFLAGS: ${{ steps.release-vars.outputs.LDFLAGS }}
           GIT_TAG: ${{ steps.release-vars.outputs.GIT_TAG }}
           GIT_HASH: ${{ steps.release-vars.outputs.GIT_HASH }}
