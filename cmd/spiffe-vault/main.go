@@ -17,6 +17,7 @@ func main() {
 		Name:    "spiffe-vault [flags] <subcommand>",
 		FlagSet: rootFlagSet,
 		Subcommands: []*ffcli.Command{
+			cli.Auth(),
 			cli.Version(),
 		},
 	}
