@@ -65,9 +65,6 @@ jobs:
           if [[ -n "$LDFLAGS" ]]; then
             echo "::set-output name=LDFLAGS::$LDFLAGS"
           fi
-          if [[ -n "$GIT_TAG" ]]; then
-            echo "::set-output name=GIT_TAG::$GIT_TAG"
-          fi
           if [[ -n "$GIT_HASH" ]]; then
             echo "::set-output name=GIT_HASH::$GIT_HASH"
           fi
@@ -75,13 +72,24 @@ jobs:
 
       - name: Release
         uses: goreleaser/goreleaser-action@v2
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           version: latest
           args: release --rm-dist
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           LDFLAGS: ${{ steps.release-vars.outputs.LDFLAGS }}
-          GIT_TAG: ${{ steps.release-vars.outputs.GIT_TAG }}
+          GIT_HASH: ${{ steps.release-vars.outputs.GIT_HASH }}
+
+      - name: Release snapshot
+        uses: goreleaser/goreleaser-action@v2
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        with:
+          version: latest
+          args: release --rm-dist --snapshot
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          LDFLAGS: ${{ steps.release-vars.outputs.LDFLAGS }}
           GIT_HASH: ${{ steps.release-vars.outputs.GIT_HASH }}
 
       - name: Logout from DockerHub Registry

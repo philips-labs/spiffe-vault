@@ -52,5 +52,4 @@ release: ## creates a release using goreleaser
 
 release-vars: ## print the release variables for goreleaser
 	@echo export LDFLAGS=\"$(LDFLAGS)\"
-	@echo export GIT_TAG=$(GIT_TAG)
 	@echo export GIT_HASH=$(GIT_HASH)
