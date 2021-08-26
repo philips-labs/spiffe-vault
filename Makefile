@@ -41,3 +41,16 @@ image: ## build the binary in a docker image
 	docker build \
 		-t "philipssoftware/spiffe-vault:$(GIT_TAG)" \
 		-t "philipssoftware/spiffe-vault:$(GIT_HASH)" .
+
+.PHONY: snapshot-release
+snapshot-release: ## creates a snapshot release using goreleaser
+	LDFLAGS=$(LDFLAGS) GIT_TAG=$(GIT_TAG) GIT_HASH=$(GIT_HASH) goreleaser release --snapshot --rm-dist
+
+.PHONY: release
+release: ## creates a release using goreleaser
+	LDFLAGS=$(LDFLAGS) GIT_TAG=$(GIT_TAG) GIT_HASH=$(GIT_HASH) goreleaser release
+
+release-vars: ## print the release variables for goreleaser
+	@echo export LDFLAGS=\"$(LDFLAGS)\"
+	@echo export GIT_TAG=$(GIT_TAG)
+	@echo export GIT_HASH=$(GIT_HASH)
