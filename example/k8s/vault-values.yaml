@@ -1,0 +1,10 @@
+server:
+  dev:
+    enabled: true
+    devRootToken: "root"
+
+  ingress:
+    enabled: true
+    hosts:
+      - host: vault.localhost
+        paths: []
