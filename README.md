@@ -198,3 +198,5 @@ $ vault write transit/verify/my-key input="$(echo stuff | base64)" signature=vau
 ```
 
 </details>
+
+See the [example](example) directory for an example infrastructure setup on Kubernetes integration the whole eco-system. This includes a Spire, Vault deployment as well utilizing `spiffe-vault` as en example workload.
