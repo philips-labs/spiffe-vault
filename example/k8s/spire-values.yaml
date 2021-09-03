@@ -1,0 +1,35 @@
+server:
+  dataStorage:
+    enabled: false
+
+oidc:
+  enabled: true
+
+  service:
+    type: ClusterIP
+
+  logLevel: DEBUG
+
+  insecureScheme:
+    enabled: true
+
+  acme:
+    tosAccepted: true
+    emailAddress: marco.franssen@philips.com
+    directoryUrl: https://acme-staging-v02.api.letsencrypt.org/directory
+
+  jwtIssuer: spire-oidc.my-spire
+
+  domains:
+    - localhost
+    - spire-oidc.my-spire
+    - spire-oidc.my-spire.svc.cluster.local
+    - oidc-spire.dev.localhost
+
+spire:
+  clusterName: "dev-cluster"
+  trustDomain: "dev.localhost"
+  agent:
+    logLevel: DEBUG
+  server:
+    logLevel: DEBUG
