@@ -21,7 +21,7 @@ module "jwt_auth" {
   roles = [
     {
       name    = local.environment,
-      subject = "spiffe://dev.localhost/ns/my-app/sa/my-app",
+      subject = "spiffe://dev.localhost/ns/my-app/sa/my-app-spiffe-vault",
       policy  = "${local.environment}-signing"
     }
   ]

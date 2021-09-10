@@ -40,7 +40,7 @@ helm -n my-vault install vault hashicorp/vault --create-namespace -f k8s/vault-v
 Once the core infrastructure is deployed we will have to provision the authentication method to [Vault][hashi-vault].
 
 ```bash
-cd vault/environment/local
+cd vault/environments/local
 cp secrets.auto.tfvars.template secrets.auto.tfvars
 # fill out the secrets you want to provision into vault
 terraform init
@@ -51,8 +51,17 @@ terraform apply -auto-approve
 ### Deploy spiffe-vault workload
 
 ```bash
-kubectl create ns my-app
-kubectl -n my-app apply -f k8s/spiffe-vault/deployment.yaml
+helm -n my-app install my-app ../charts/spiffe-vault --create-namespace -f k8s/spiffe-vault.yaml
+```
+
+### play with spiffe-vault
+
+```bash
+$ kubectl exec -n my-app -i -t \
+    $(kubectl -n my-app get pods -l app.kubernetes.io/name=spiffe-vault -o jsonpath="{.items[0].metadata.name}") \
+    -c spiffe-vault -- sh
+$ export VAULT_ADDR=http://vault-internal.my-vault
+$ ./spiffe-vault auth -role local
 ```
 
 [kubernetes]: https://kubernetes.io "Production-Grade Container Orchestration"
