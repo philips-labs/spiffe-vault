@@ -1,0 +1,5 @@
+Time to play with 'spiffe-vault':
+
+  kubectl exec -n {{ .Release.Namespace }} -i -t \
+    $(kubectl -n {{ .Release.Namespace }} get pods -l app.kubernetes.io/name={{ .Chart.Name }} -o jsonpath="{.items[0].metadata.name}") \
+    -c {{ .Chart.Name }} -- sh
