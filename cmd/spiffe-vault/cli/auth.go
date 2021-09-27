@@ -43,7 +43,10 @@ func Auth() *ffcli.Command {
 				return err
 			}
 
-			c.Authenticate(jwt, *role)
+			err = c.Authenticate(jwt, *role)
+			if err != nil {
+				return err
+			}
 
 			fmt.Println("# Export following environment variable to authenticate to Hashicorp Vault")
 			fmt.Printf("export VAULT_TOKEN=%s\n", c.Token())
