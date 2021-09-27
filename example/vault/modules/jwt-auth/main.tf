@@ -11,7 +11,7 @@ resource "vault_jwt_auth_backend_role" "spire_oidc" {
   role_name       = each.value.name
   token_policies  = ["default", each.value.policy]
   token_ttl       = 60
-  bound_audiences = ["TESTING"]
+  bound_audiences = ["CI"]
   bound_subject   = each.value.subject
   user_claim      = "sub"
   role_type       = "jwt"

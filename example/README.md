@@ -61,8 +61,36 @@ $ kubectl exec -n my-app -i -t \
     $(kubectl -n my-app get pods -l app.kubernetes.io/name=spiffe-vault -o jsonpath="{.items[0].metadata.name}") \
     -c spiffe-vault -- sh
 $ export VAULT_ADDR=http://vault-internal.my-vault:8200
-$ ./spiffe-vault auth -role local
+$ eval "$(./spiffe-vault auth -role local)"
+$ vault list transit/keys
+Keys
+----
+cosign
+$ vault read transit/keys/cosign
+Key                       Value
+---                       -----
+allow_plaintext_backup    false
+deletion_allowed          false
+derived                   false
+exportable                false
+keys                      map[1:map[creation_time:2021-09-27T12:28:54.878899344Z name:P-256 public_key:-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAERyHSkgCB+QrOLQEFU3W16Ir4pkir
+YXNU+PgP2vEce1Klq0LfG792iLCNIODa/Jt3fw4Uu9dS7KVqM8XNsAlU1A==
+-----END PUBLIC KEY-----
+]]
+latest_version            1
+min_available_version     0
+min_decryption_version    1
+min_encryption_version    0
+name                      cosign
+supports_decryption       false
+supports_derivation       false
+supports_encryption       false
+supports_signing          true
+type                      ecdsa-p256
 ```
+
+Please note that we configured vault to have a token lifetime of only 600 seconds. Before the token expires you will have to renew the token or retrieve a new one using `spiffe-vault`.
 
 [kubernetes]: https://kubernetes.io "Production-Grade Container Orchestration"
 [hashi-vault]: https://vaultproject.io "Manage Secrets and Protect Sensitive Data"

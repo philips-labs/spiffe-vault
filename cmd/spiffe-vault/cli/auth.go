@@ -17,6 +17,7 @@ func Auth() *ffcli.Command {
 		flagset  = flag.NewFlagSet("spiffe-vault version", flag.ExitOnError)
 		authPath = flagset.String("authPath", "jwt", "the authentication path in Vault (default: jwt)")
 		role     = flagset.String("role", "", "the role to authenticate with against Vault")
+		audience = flagset.String("audience", "CI", "the bound audience to verify in the claims")
 	)
 	return &ffcli.Command{
 		Name:    "auth",
@@ -33,7 +34,7 @@ func Auth() *ffcli.Command {
 			ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 			defer cancel()
 
-			jwt, err := spiffe.FetchJWT(ctx)
+			jwt, err := spiffe.FetchJWT(ctx, *audience)
 			if err != nil {
 				return err
 			}

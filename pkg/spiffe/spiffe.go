@@ -12,7 +12,7 @@ const (
 	socketPath = "unix:///var/run/spire/sockets/agent.sock"
 )
 
-func FetchJWT(ctx context.Context) (string, error) {
+func FetchJWT(ctx context.Context, audience string) (string, error) {
 	clientOptions := workloadapi.WithClientOptions(workloadapi.WithAddr(socketPath))
 
 	jwtSource, err := workloadapi.NewJWTSource(ctx, clientOptions)
@@ -22,7 +22,7 @@ func FetchJWT(ctx context.Context) (string, error) {
 	defer jwtSource.Close()
 
 	svid, err := jwtSource.FetchJWTSVID(ctx, jwtsvid.Params{
-		Audience: "TESTING",
+		Audience: audience,
 	})
 	if err != nil {
 		return "", fmt.Errorf("unable to fetch svid: %w", err)

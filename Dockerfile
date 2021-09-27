@@ -7,10 +7,13 @@ COPY . .
 RUN apk add --no-cache make git
 RUN make build
 
+FROM vault:1.8.2 AS vault-binary
+
 FROM busybox
 LABEL maintainer="marco.franssen@philips.com"
 RUN mkdir -p /app
 WORKDIR /app
 ENV VAULT_ADDR=
 COPY --from=builder build/bin/spiffe-vault .
+COPY --from=vault-binary bin/vault /usr/local/bin/vault
 ENTRYPOINT [ "/app/spiffe-vault" ]
