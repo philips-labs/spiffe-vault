@@ -39,7 +39,7 @@ helm -n my-vault install vault hashicorp/vault --create-namespace -f k8s/vault-v
 
 ### Provision Vault
 
-Once the core infrastructure is deployed we will have to provision the authentication method to [Vault][hashi-vault].
+Once the core infrastructure is deployed we will have to provision the authentication method to [Vault][hashi-vault]. Terraform will also provision a transit engine which I use in the example below. Also note the Vault policy prevents you from doing any other operations then allowed by the policy. Doing so enables us to have finegrained access to different resources in Vault.
 
 ```bash
 cd vault/environments/local
@@ -52,11 +52,22 @@ terraform apply -auto-approve
 
 ### Deploy spiffe-vault workload
 
+Within kubernetes our Spire Helm chart also deploys the [spire-k8s-workload-registrar][spire-k8s-workload-registrar]. This Spire component takes care of registering workloads/pods with the Spire server. Once a workload is registered with the Spire Server it will be given a SPIFFE ID.
+
 ```bash
 helm -n my-app install my-app ../charts/spiffe-vault --create-namespace -f k8s/spiffe-vault.yaml
 ```
 
 ### play with spiffe-vault
+
+Using our `spiffe-vault` workload, which at this stage has a SPIFFE ID, we can now authenticate to Hashicorp Vault. Hashicorp Vault was configured to allow authentication via a JWT token with a given subject matching the SPIFFE ID.
+
+The flow below will perform the following steps.
+
+1. Open a Shell to the `spiffe-vault` container in kubernetes.
+2. Configure the VAULT_ADDR to point to our Vault deployment.
+3. Use the `spiffe-vault` cli-tool to perform the authentication to Vault using a Spire JWT and then export the VAULT_TOKEN in our current shell.
+4. Interact with the Vault using the Vault cli.
 
 ```bash
 $ kubectl exec -n my-app -i -t \
@@ -94,6 +105,17 @@ type                      ecdsa-p256
 
 Please note that we configured vault to have a token lifetime of only 600 seconds. Before the token expires you will have to renew the token or retrieve a new one using `spiffe-vault`.
 
+A practical usecase for using the transit engine is for example in combination with [Cosign][cosign]. We can use it to create a signature without the need to download a signing key on our local system. Assuming you would have [Cosign][cosign] installed following flow would be possible with this example setup.
+
+```bash
+$ kubectl exec -n my-app -i -t \
+    $(kubectl -n my-app get pods -l app.kubernetes.io/name=spiffe-vault -o jsonpath="{.items[0].metadata.name}") \
+    -c spiffe-vault -- sh
+$ export VAULT_ADDR=http://vault-internal.my-vault:8200
+$ eval "$(./spiffe-vault auth -role local)"
+$ cosign sign -key hashivault://cosign philipssoftware/spiffe-vault:latest
+```
+
 [kubernetes]: https://kubernetes.io "Production-Grade Container Orchestration"
 [hashi-vault]: https://vaultproject.io "Manage Secrets and Protect Sensitive Data"
 [spiffe]: https://spiffe.io "A universal identity control plane for distributed systems"
@@ -104,3 +126,5 @@ Please note that we configured vault to have a token lifetime of only 600 second
 [eks]: https://aws.amazon.com/eks/ "Amazon Elastic Kubernetes Service"
 [aks]: https://azure.microsoft.com/en-us/services/kubernetes-service/ "Azure Kubernetes Service"
 [gke]: https://cloud.google.com/kubernetes-engine "Google Kubernetes Engine"
+[spire-k8s-workload-registrar]: https://github.com/spiffe/spire/tree/main/support/k8s/k8s-workload-registrar "The SPIRE Kubernetes Workload Registrar implements a Kubernetes ValidatingAdmissionWebhook that facilitates automatic workload registration within Kubernetes."
+[cosign]: https://github.com/sigstore/cosign "Container Signing, Verification and Storage in an OCI registry."
