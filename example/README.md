@@ -23,6 +23,7 @@ We make use of some existing Helm charts. To do so we have to add these reposito
 ```bash
 helm repo add philips-labs https://philips-labs.github.io/helm-charts/
 helm repo add hashicorp https://helm.releases.hashicorp.com
+helm repo add traefik https://helm.traefik.io/traefik
 helm repo update
 ```
 
@@ -32,6 +33,7 @@ Now we will deploy the Helm charts to our Kubernetes cluster.
 
 ```bash
 helm -n my-spire install spire philips-labs/spire --create-namespace -f k8s/spire-values.yaml
+helm -n my-traefik install traefik traefik/traefik --create-namespace -f k8s/traefik-values.yaml
 helm -n my-vault install vault hashicorp/vault --create-namespace -f k8s/vault-values.yaml
 ```
 
