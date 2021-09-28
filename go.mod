@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.0 // indirect
 	github.com/hashicorp/vault/api v1.1.1
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
-	github.com/peterbourgon/ff/v3 v3.1.0
+	github.com/peterbourgon/ff/v3 v3.1.2
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/spiffe/go-spiffe/v2 v2.0.0-beta.8
