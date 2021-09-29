@@ -39,6 +39,8 @@ helm -n my-vault install vault hashicorp/vault --create-namespace -f k8s/vault-v
 
 ### Provision Vault
 
+> :warning: Add `vault.localhost` to your hosts file (`/etc/hosts`).
+
 Once the core infrastructure is deployed we will have to provision the authentication method to [Vault][hashi-vault]. Terraform will also provision a transit engine which I use in the example below. Also note the Vault policy prevents you from doing any other operations then allowed by the policy. Doing so enables us to have finegrained access to different resources in Vault.
 
 ```bash
