@@ -43,8 +43,6 @@ Once the core infrastructure is deployed we will have to provision the authentic
 
 ```bash
 cd vault/environments/local
-cp secrets.auto.tfvars.template secrets.auto.tfvars
-# fill out the secrets you want to provision into vault
 terraform init
 terraform plan
 terraform apply -auto-approve
