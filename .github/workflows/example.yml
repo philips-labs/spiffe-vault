@@ -1,0 +1,56 @@
+name: Example CI
+
+on:
+  push:
+    paths:
+      - 'example/**'
+      - .github/workflows/example.yml
+  pull_request:
+    paths:
+      - 'example/**'
+      - .github/workflows/example.yml
+  workflow_dispatch:
+
+jobs:
+  validate-terraform:
+    strategy:
+      matrix:
+        target: [vault]
+
+    name: Check module ${{ matrix.target }}
+    runs-on: ubuntu-20.04
+
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2.3.4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1.3.2
+        with:
+          terraform_version: 1.0.8
+
+      - name: Validate ${{ matrix.target }} modules
+        run: |
+          for module in $(find . -maxdepth 1 -mindepth 1 -type d); do
+            pushd $module > /dev/null
+            pwd
+            terraform init
+            terraform fmt --recursive -check=true
+            terraform validate
+            popd > /dev/null
+          done
+        working-directory: example/${{ matrix.target }}/modules
+
+      - name: Validate ${{ matrix.target }} environments
+        run: |
+          for env in $(find . -maxdepth 1 -mindepth 1 -type d); do
+            pushd $env > /dev/null
+            pwd
+            terraform init -backend=false
+            terraform fmt --recursive -check=true
+            terraform validate
+            popd > /dev/null
+          done
+        working-directory: example/${{ matrix.target }}/environments
