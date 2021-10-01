@@ -79,7 +79,7 @@ $ kubectl exec -n my-app -i -t \
     $(kubectl -n my-app get pods -l app.kubernetes.io/name=spiffe-vault -o jsonpath="{.items[0].metadata.name}") \
     -c spiffe-vault -- sh
 $ export VAULT_ADDR=http://vault-internal.my-vault:8200
-$ eval "$(./spiffe-vault auth -role local)"
+$ eval "$(spiffe-vault auth -role local)"
 $ vault list transit/keys
 Keys
 ----
@@ -133,7 +133,7 @@ Using default tag: latest
 The push refers to repository [docker.io/marcofranssen/busybox]
 cfd97936a580: Mounted from library/busybox
 latest: digest: sha256:febcf61cd6e1ac9628f6ac14fa40836d16f3c6ddef3b303ff0321606e55ddd0b size: 527
-$ eval "$(./spiffe-vault auth -role local)"
+$ eval "$(spiffe-vault auth -role local)"
 $ cosign sign -key hashivault://cosign marcofranssen/busybox:latest
 Pushing signature to: index.docker.io/marcofranssen/busybox:sha256-febcf61cd6e1ac9628f6ac14fa40836d16f3c6ddef3b303ff0321606e55ddd0b.sig
 $ cosign verify -key hashivault://cosign marcofranssen/busybox:latest

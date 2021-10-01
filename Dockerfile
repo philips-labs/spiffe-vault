@@ -18,6 +18,6 @@ RUN mkdir -p /app
 WORKDIR /app
 ENV VAULT_ADDR=
 COPY --from=certs /etc/ssl/certs /etc/ssl/certs
-COPY --from=builder build/bin/spiffe-vault .
+COPY --from=builder build/bin/spiffe-vault /usr/local/bin/spiffe-vault
 COPY --from=vault-binary bin/vault /usr/local/bin/vault
-ENTRYPOINT [ "/app/spiffe-vault" ]
+ENTRYPOINT [ "/usr/local/bin/spiffe-vault" ]
