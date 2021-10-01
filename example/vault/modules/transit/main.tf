@@ -26,13 +26,13 @@ data "vault_policy_document" "code_signing" {
   }
 
   rule {
-    path         = "${vault_mount.transit.path}/hmac/${vault_transit_secret_backend_key.code_signing_dev.name}"
+    path         = "${vault_mount.transit.path}/hmac/${vault_transit_secret_backend_key.code_signing_dev.name}/*"
     capabilities = ["update"]
     description  = "Allow creating hmacs"
   }
 
   rule {
-    path         = "${vault_mount.transit.path}/sign/${vault_transit_secret_backend_key.code_signing_dev.name}"
+    path         = "${vault_mount.transit.path}/sign/${vault_transit_secret_backend_key.code_signing_dev.name}/*"
     capabilities = ["update"]
     description  = "Allow creating signatures"
   }
@@ -44,7 +44,7 @@ data "vault_policy_document" "code_signing" {
   }
 
   rule {
-    path         = "${vault_mount.transit.path}/verify/${vault_transit_secret_backend_key.code_signing_dev.name}"
+    path         = "${vault_mount.transit.path}/verify/${vault_transit_secret_backend_key.code_signing_dev.name}/*"
     capabilities = ["update"]
     description  = "Allow verifying signatures and hmacs"
   }
