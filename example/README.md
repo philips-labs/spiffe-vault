@@ -54,7 +54,12 @@ terraform apply -auto-approve
 
 Within kubernetes our Spire Helm chart also deploys the [spire-k8s-workload-registrar][spire-k8s-workload-registrar]. This Spire component takes care of registering workloads/pods with the Spire server. Once a workload is registered with the Spire Server it will be given a SPIFFE ID.
 
+In `k8s/spiffe-vault.yaml` we defined we want to use the `philipssoftware/spiffe-vault-cosign` image that adds the [Cosign][cosign] binary in the image as well. So we can also play with cosign later in this example.
+
+Let's build this custom build now and then deploy our workload to Kubernetes.
+
 ```bash
+docker build -t philipssoftware/spiffe-vault-cosign:latest spiffe-vault-cosign
 helm -n my-app install my-app ../charts/spiffe-vault --create-namespace -f k8s/spiffe-vault.yaml
 ```
 
@@ -105,15 +110,41 @@ type                      ecdsa-p256
 
 Please note that we configured vault to have a token lifetime of only 600 seconds. Before the token expires you will have to renew the token or retrieve a new one using `spiffe-vault`.
 
-A practical usecase for using the transit engine is for example in combination with [Cosign][cosign]. We can use it to create a signature without the need to download a signing key on our local system. Assuming you would have [Cosign][cosign] installed following flow would be possible with this example setup.
+A practical usecase for using the transit engine is for example in combination with [Cosign][cosign]. We can use it to create a signature without the need to download a signing key on our local system. We used a custom build of our `spiffe-vault` image when deploying our app including [Cosign][cosign]. In the following workflow you might want to try the following with your personal dockerhub account, so replace my username with your own.
 
 ```bash
 $ kubectl exec -n my-app -i -t \
     $(kubectl -n my-app get pods -l app.kubernetes.io/name=spiffe-vault -o jsonpath="{.items[0].metadata.name}") \
     -c spiffe-vault -- sh
 $ export VAULT_ADDR=http://vault-internal.my-vault:8200
+$ docker login
+Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com to create one.
+Username: marcofranssen
+Password:
+WARNING! Your password will be stored unencrypted in /root/.docker/config.json.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+Login Succeeded
+$ docker pull busybox
+$ docker tag busybox marcofranssen/busybox:latest
+$ docker push marcofranssen/busybox:latest
+Using default tag: latest
+The push refers to repository [docker.io/marcofranssen/busybox]
+cfd97936a580: Mounted from library/busybox
+latest: digest: sha256:febcf61cd6e1ac9628f6ac14fa40836d16f3c6ddef3b303ff0321606e55ddd0b size: 527
 $ eval "$(./spiffe-vault auth -role local)"
-$ cosign sign -key hashivault://cosign philipssoftware/spiffe-vault:latest
+$ cosign sign -key hashivault://cosign marcofranssen/busybox:latest
+Pushing signature to: index.docker.io/marcofranssen/busybox:sha256-febcf61cd6e1ac9628f6ac14fa40836d16f3c6ddef3b303ff0321606e55ddd0b.sig
+$ cosign verify -key hashivault://cosign marcofranssen/busybox:latest
+
+Verification for marcofranssen/busybox:latest --
+The following checks were performed on each of these signatures:
+  - The cosign claims were validated
+  - The signatures were verified against the specified public key
+  - Any certificates were verified against the Fulcio roots.
+
+[{"critical":{"identity":{"docker-reference":"index.docker.io/marcofranssen/busybox"},"image":{"docker-manifest-digest":"sha256:febcf61cd6e1ac9628f6ac14fa40836d16f3c6ddef3b303ff0321606e55ddd0b"},"type":"cosign container image signature"},"optional":null}]
 ```
 
 [kubernetes]: https://kubernetes.io "Production-Grade Container Orchestration"
