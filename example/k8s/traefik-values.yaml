@@ -1,0 +1,21 @@
+additionalArguments:
+  - "--serverstransport.insecureskipverify=true"
+
+logs:
+  general:
+    level: DEBUG
+  access:
+    enabled: true
+
+ports:
+  # As we are using a selfsigned certificate on localhost we disable permanent redirect.
+  # This is required for the terraform apply to succeed the provisoning over http.
+  # web:
+  #   redirectTo: websecure
+  websecure:
+    tls:
+      enabled: true
+
+pilot:
+  enabled: false
+  dashboard: false

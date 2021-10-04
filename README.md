@@ -106,6 +106,12 @@ policies             [default my-role]
 renewable            true
 ttl                  56s
 type                 service
+$ vault write transit/sign/my-key input="$(echo stuff | base64)"
+Key            Value
+---            -----
+key_version    1
+signature      vault:v1:MEUCIFAWmHPyLJ6V0mjMgqr5UnV40bkCEUEGqApcYI54VAPIAiEAqyG2VkFc2wpYs/n47mK4vgfTVbXjWJzMM7Fxr/bR7LE=
+$ vault write transit/verify/my-key input="$(echo stuff | base64)" signature=vault:v1:MEUCIFAWmHPyLJ6V0mjMgqr5UnV40bkCEUEGqApcYI54VAPIAiEAqyG2VkFc2wpYs/n47mK4vgfTVbXjWJzMM7Fxr/bR7LE=
 ```
 
 </details>
@@ -183,6 +189,14 @@ policies             [default my-role]
 renewable            true
 ttl                  56s
 type                 service
+$ vault write transit/sign/my-key input="$(echo stuff | base64)"
+Key            Value
+---            -----
+key_version    1
+signature      vault:v1:MEUCIFAWmHPyLJ6V0mjMgqr5UnV40bkCEUEGqApcYI54VAPIAiEAqyG2VkFc2wpYs/n47mK4vgfTVbXjWJzMM7Fxr/bR7LE=
+$ vault write transit/verify/my-key input="$(echo stuff | base64)" signature=vault:v1:MEUCIFAWmHPyLJ6V0mjMgqr5UnV40bkCEUEGqApcYI54VAPIAiEAqyG2VkFc2wpYs/n47mK4vgfTVbXjWJzMM7Fxr/bR7LE=
 ```
 
 </details>
+
+See the [example](example) directory for an example infrastructure setup on Kubernetes integration the whole eco-system. This includes a Spire, Vault deployment as well utilizing `spiffe-vault` as en example workload.

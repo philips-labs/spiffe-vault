@@ -1,0 +1,6 @@
+image:
+  repository: philipssoftware/spiffe-vault-cosign
+  tag: latest
+
+docker:
+  enabled: true
