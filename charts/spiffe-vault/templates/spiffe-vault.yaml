@@ -24,13 +24,20 @@ spec:
       {{- if .Values.docker.enabled }}
       env:
         - name: DOCKER_HOST
-          value: tcp://localhost:2375
+          value: tcp://localhost:2376
+        - name: DOCKER_TLS
+          value: "1"
+        - name: DOCKER_CERT_PATH
+          value: /certs/client
       {{- end }}
       resources:
         {{- toYaml .Values.resources | nindent 12 }}
       volumeMounts:
         - name: spire-agent-sockets
           mountPath: /var/run/spire/sockets
+          readOnly: true
+        - name: docker-certs
+          mountPath: /certs/client
           readOnly: true
     {{- if .Values.docker.enabled }}
     - name: dind-daemon
@@ -41,11 +48,13 @@ spec:
       resources:
         {{- toYaml .Values.docker.resources | nindent 12 }}
       env:
-        - name: DOCKER_TLS_CERTDIR
-          value: ''
+        - name: DOCKER_CERT_PATH
+          value: /certs/client
       volumeMounts:
         - name: docker-graph-storage
           mountPath: /var/lib/docker
+        - name: docker-certs
+          mountPath: /certs/client
     {{- end }}
   restartPolicy: OnFailure
   {{- with .Values.nodeSelector }}
@@ -67,5 +76,7 @@ spec:
         type: DirectoryOrCreate
     {{- if .Values.docker.enabled }}
     - name: docker-graph-storage
+      emptyDir: {}
+    - name: docker-certs
       emptyDir: {}
     {{- end }}
