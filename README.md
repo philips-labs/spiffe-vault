@@ -2,6 +2,9 @@
 
 Integrates [SPIFFE][spiffe] SVID authentication with [Hashicorp Vault][hashivault] to retrieve a `VAULT_TOKEN`.
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/philips-labs/spiffe-vault)](https://goreportcard.com/report/github.com/philips-labs/spiffe-vault)
+[![codecov](https://codecov.io/gh/philips-labs/spiffe-vault/branch/main/graph/badge.svg)](https://codecov.io/gh/philips-labs/spiffe-vault)
+
 ## Example usecases
 
 - Read secrets from Hashicorp Vault [Hashicorp Vault][hashivault] without providing a secret to authenticate against [Hashicorp Vault][hashivault]. Instead we will be using a [SPIFFE][spiffe] SVID to authenticate ourself against [Hashicorp Vault][hashivault].
