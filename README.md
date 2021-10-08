@@ -2,6 +2,7 @@
 
 Integrates [SPIFFE][spiffe] SVID authentication with [Hashicorp Vault][hashivault] to retrieve a `VAULT_TOKEN`.
 
+[![Go CI](https://github.com/philips-labs/spiffe-vault/actions/workflows/golang.yml/badge.svg)](https://github.com/philips-labs/spiffe-vault/actions/workflows/golang.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/philips-labs/spiffe-vault)](https://goreportcard.com/report/github.com/philips-labs/spiffe-vault)
 [![codecov](https://codecov.io/gh/philips-labs/spiffe-vault/branch/main/graph/badge.svg)](https://codecov.io/gh/philips-labs/spiffe-vault)
 
