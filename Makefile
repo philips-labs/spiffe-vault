@@ -53,3 +53,18 @@ release: ## creates a release using goreleaser
 release-vars: ## print the release variables for goreleaser
 	@echo export LDFLAGS=\"$(LDFLAGS)\"
 	@echo export GIT_HASH=$(GIT_HASH)
+
+.PHONY: test
+test: ## runs the tests
+	go test -race -v -count=1 ./...
+
+coverage.out: FORCE
+	go test -race -v -count=1 -covermode=atomic -coverprofile=coverage.out ./...
+
+.PHONY: coverage.out
+coverage-out: coverage.out ## Ouput code coverage to stdout
+	go tool cover -func=$<
+
+.PHONY: coverage.out
+coverage-html: coverage.out ## Ouput code coverage as HTML
+	go tool cover -html=$<
