@@ -54,6 +54,13 @@ release-vars: ## print the release variables for goreleaser
 	@echo export LDFLAGS=\"$(LDFLAGS)\"
 	@echo export GIT_HASH=$(GIT_HASH)
 
+$(GO_PATH)/bin/golint:
+	go install golang.org/x/lint/golint@latest
+
+.PHONY: lint
+lint: $(GO_PATH)/bin/golint ## runs linting
+	golint ./...
+
 .PHONY: test
 test: ## runs the tests
 	go test -race -v -count=1 ./...
