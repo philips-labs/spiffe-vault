@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/peterbourgon/ff/v3/ffcli"
+
 	"github.com/philips-labs/spiffe-vault/cmd/spiffe-vault/cli"
 )
 

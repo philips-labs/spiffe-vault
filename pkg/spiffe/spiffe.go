@@ -12,6 +12,7 @@ const (
 	socketPath = "unix:///var/run/spire/sockets/agent.sock"
 )
 
+// FetchJWT retrieves a JWT SVID upon successfull attestation
 func FetchJWT(ctx context.Context, audience string) (string, error) {
 	clientOptions := workloadapi.WithClientOptions(workloadapi.WithAddr(socketPath))
 
