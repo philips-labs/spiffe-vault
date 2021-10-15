@@ -33,8 +33,31 @@ jobs:
       - name: Get dependencies
         run: go mod download
 
+      - name: Lint
+        run: |
+          result=$(make lint)
+          echo $result
+          [ -n "$(echo "$result" | grep 'diff -u')" ] && exit 1 || exit 0
+
       - name: Build
         run: make build
+
+      - name: Test
+        run: make test
+
+      - name: Coverage
+        run: make coverage-out
+
+      - name: Upload Code Coverage
+        uses: codecov/codecov-action@v2.1.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.out
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
+          path_to_write_report: ./codecov_report.txt
+          verbose: true
 
   release:
     name: release

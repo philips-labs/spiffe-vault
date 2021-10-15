@@ -12,6 +12,7 @@ import (
 	"github.com/philips-labs/spiffe-vault/pkg/vault"
 )
 
+// Auth creates an instance of *ffcli.Command to authenticate with vault using Spiffe
 func Auth() *ffcli.Command {
 	var (
 		flagset  = flag.NewFlagSet("spiffe-vault version", flag.ExitOnError)

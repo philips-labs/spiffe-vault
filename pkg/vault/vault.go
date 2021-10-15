@@ -6,11 +6,13 @@ import (
 	"github.com/hashicorp/vault/api"
 )
 
+// Client holds a Hashicorp Vault client
 type Client struct {
 	*api.Client
 	authPath string
 }
 
+// NewClient create a new instance of *Client
 func NewClient(authPath string) (*Client, error) {
 	c, err := api.NewClient(api.DefaultConfig())
 	if err != nil {
@@ -20,6 +22,7 @@ func NewClient(authPath string) (*Client, error) {
 	return &Client{c, authPath}, nil
 }
 
+// Authenticate authenticates hashicorp Vault using a given jwt and role
 func (c *Client) Authenticate(jwt, role string) error {
 	if jwt == "" {
 		return fmt.Errorf("no jwt token provided to authenticate vault")
@@ -39,6 +42,7 @@ func (c *Client) Authenticate(jwt, role string) error {
 	return nil
 }
 
+// GetSecret reads a secret from the given path and key
 func (c *Client) GetSecret(path, key string) (map[string]interface{}, error) {
 	secret, err := c.Logical().Read(fmt.Sprintf("%s/data/%s", path, key))
 	if err != nil {

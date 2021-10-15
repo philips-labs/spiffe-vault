@@ -5,3 +5,4 @@ dist/
 terraform.tfstate
 terraform.tfstate.*
 secrets.auto.tfvars
+coverage.out
