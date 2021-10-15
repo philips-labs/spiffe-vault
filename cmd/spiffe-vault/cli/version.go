@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"runtime"
 	"strings"
 	"text/tabwriter"
@@ -29,16 +30,19 @@ var (
 	buildDate = "unknown"
 )
 
-//Version creates an instance of *ffcli.Command to print version information
-func Version() *ffcli.Command {
+// Version creates an instance of *ffcli.Command to print version info
+func Version(w io.Writer) *ffcli.Command {
 	var (
 		flagset = flag.NewFlagSet("spiffe-vault version", flag.ExitOnError)
 		outJSON = flagset.Bool("json", false, "print JSON instead of text")
 	)
+
+	flagset.SetOutput(w)
+
 	return &ffcli.Command{
 		Name:       "version",
-		ShortUsage: "cosign version",
-		ShortHelp:  "Prints the cosign version",
+		ShortUsage: "spiffe-vault version",
+		ShortHelp:  "Prints the spiffe-vault version",
 		FlagSet:    flagset,
 		Exec: func(ctx context.Context, args []string) error {
 			v := VersionInfo()
@@ -51,13 +55,13 @@ func Version() *ffcli.Command {
 				res = j
 			}
 
-			fmt.Println(res)
+			fmt.Fprintln(w, res)
 			return nil
 		},
 	}
 }
 
-// Info holds this binaries version information
+// Info holds the version information of the binary
 type Info struct {
 	GitVersion   string `json:"git_version,omitempty"`
 	GitCommit    string `json:"git_commit,omitempty"`
@@ -68,7 +72,7 @@ type Info struct {
 	Platform     string `json:"platform,omitempty"`
 }
 
-// VersionInfo creates an instance of version Info
+// VersionInfo creates an instance of the Info structure
 func VersionInfo() Info {
 	return Info{
 		GitVersion:   GitVersion,

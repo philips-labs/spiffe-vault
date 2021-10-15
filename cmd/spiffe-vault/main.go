@@ -19,7 +19,7 @@ func main() {
 		FlagSet: rootFlagSet,
 		Subcommands: []*ffcli.Command{
 			cli.Auth(),
-			cli.Version(),
+			cli.Version(os.Stdout),
 		},
 	}
 
