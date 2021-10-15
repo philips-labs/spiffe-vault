@@ -71,23 +71,11 @@ jobs:
           fi
           rm -f /tmp/spiffe-vault-release-vars.env
 
-      - name: Release
+      - name: Release ${{ !startsWith(github.ref, 'refs/tags/') && 'snapshot' }}
         uses: goreleaser/goreleaser-action@v2
-        if: startsWith(github.ref, 'refs/tags/')
         with:
           version: latest
-          args: release --rm-dist
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          LDFLAGS: ${{ steps.release-vars.outputs.LDFLAGS }}
-          GIT_HASH: ${{ steps.release-vars.outputs.GIT_HASH }}
-
-      - name: Release snapshot
-        uses: goreleaser/goreleaser-action@v2
-        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
-        with:
-          version: latest
-          args: release --rm-dist --snapshot
+          args: release --rm-dist ${{ !startsWith(github.ref, 'refs/tags/') && '--snapshot' }}
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           LDFLAGS: ${{ steps.release-vars.outputs.LDFLAGS }}
