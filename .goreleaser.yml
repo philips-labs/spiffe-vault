@@ -40,12 +40,16 @@ dockers:
     image_templates:
       - "philipssoftware/{{ .ProjectName }}:{{ .Tag }}"
       - "philipssoftware/{{ .ProjectName }}:{{ .Env.GIT_HASH }}"
+      - "ghcr.io/philips-labs/{{ .ProjectName }}:{{ .Tag }}"
+      - "ghcr.io/philips-labs/{{ .ProjectName }}:{{ .Env.GIT_HASH }}"
     build_flag_templates:
       - "--pull"
       - "--label=com.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.description={{.ProjectName}}"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.licenses=MIT"
     extra_files:
       - "Makefile"
       - "go.mod"
