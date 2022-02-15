@@ -81,3 +81,7 @@ coverage-out: coverage.out ## Ouput code coverage to stdout
 .PHONY: coverage.out
 coverage-html: coverage.out ## Ouput code coverage as HTML
 	go tool cover -html=$<
+
+.PHONY: outdated
+outdated: ## Checks for outdated dependencies
+	go list -u -m -json all | go-mod-outdated -update
