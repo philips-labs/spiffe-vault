@@ -14,7 +14,8 @@ ifeq ($(DIFF), 1)
     GIT_TREESTATE = "dirty"
 endif
 
-PKG=github.com/philips-labs/spiffe-vault/cmd/spiffe-vault/cli
+MOD=github.com/philips-labs/spiffe-vault
+PKG=$(MOD)/cmd/spiffe-vault/cli
 LDFLAGS="-X $(PKG).GitVersion=$(GIT_VERSION) -X $(PKG).gitCommit=$(GIT_HASH) -X $(PKG).gitTreeState=$(GIT_TREESTATE) -X $(PKG).buildDate=$(BUILD_DATE)"
 
 GO_BUILD_FLAGS := -trimpath -ldflags $(LDFLAGS)
@@ -65,14 +66,14 @@ lint: $(GO_PATH)/bin/goimports $(GO_PATH)/bin/golint ## runs linting
 	@echo Linting using golint
 	@golint -set_exit_status $(shell go list -f '{{ .Dir }}' ./...)
 	@echo Linting imports
-	@goimports -d -e -local github.com/philips-labs/spiffe-vault $(shell go list -f '{{ .Dir }}' ./...)
+	@goimports -d -e -local $(MOD) $(shell go list -f '{{ .Dir }}' ./...)
 
 .PHONY: test
 test: ## runs the tests
 	go test -race -v -count=1 ./...
 
 coverage.out: FORCE
-	go test -race -v -count=1 -covermode=atomic -coverprofile=coverage.out ./...
+	go test -race -v -count=1 -covermode=atomic -coverprofile=$@ ./...
 
 .PHONY: coverage.out
 coverage-out: coverage.out ## Ouput code coverage to stdout
