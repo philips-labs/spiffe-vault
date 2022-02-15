@@ -68,6 +68,11 @@ jobs:
     needs: [build]
     runs-on: ubuntu-20.04
 
+    outputs:
+      container_digest: ${{ steps.container_info.outputs.container_digest }}
+      container_tags: ${{ steps.container_info.outputs.container_tags }}
+      container_repos: ${{ steps.container_info.outputs.container_repos }}
+
     steps:
       - name: Set up Go
         uses: actions/setup-go@v2.2.0
@@ -119,6 +124,15 @@ jobs:
           GIT_HASH: ${{ steps.release-vars.outputs.GIT_HASH }}
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
 
+      - name: Get container info
+        id: container_info
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          export CONTAINER_DIGEST=$(make container-digest GITHUB_REF=${{ github.ref_name }})
+          echo "::set-output name=container_digest::$CONTAINER_DIGEST"
+          echo "::set-output name=container_tags::$(make container-tags CONTAINER_DIGEST="${CONTAINER_DIGEST}" | paste -s -d ',' -)"
+          echo "::set-output name=container_repos::$(make container-repos CONTAINER_DIGEST="${CONTAINER_DIGEST}" | jq --raw-input . | jq --slurp -c)"
+
       - name: Logout from container registries
         if: ${{ always() }}
         run: |
@@ -145,3 +159,56 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
+  container-provenance:
+    name: container-provenance
+    needs: [release]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-20.04
+
+    strategy:
+      matrix:
+        repo: ${{ fromJSON(needs.release.outputs.container_repos) }}
+
+    steps:
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v2.0.0
+        with:
+          cosign-release: 'v1.5.1'
+
+      - name: Generate provenance for ${{ matrix.repo }}
+        uses: philips-labs/slsa-provenance-action@v0.7.0
+        with:
+          command: generate
+          subcommand: container
+          arguments: --repository ${{ matrix.repo }} --output-path provenance.att --digest ${{ needs.release.outputs.container_digest }} --tags ${{ needs.release.outputs.container_tags }}
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Get slsa-provenance predicate
+        run: |
+          cat provenance.att | jq .predicate > provenance-predicate.att
+
+      - name: Login to Container registries
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u philipssoftware --password-stdin
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin ghcr.io
+
+      - name: Attach provenance to image
+        run: |
+          echo '${{ secrets.COSIGN_PRIVATE_KEY }}' > cosign.key
+          cosign attest --predicate provenance-predicate.att --type slsaprovenance --key cosign.key ${{ matrix.repo }}@${{ needs.release.outputs.container_digest }}
+        env:
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+
+      - name: Verify attestation
+        run: |
+          echo '${{ secrets.COSIGN_PUBLIC_KEY }}' > cosign.pub
+          cosign verify-attestation --key cosign.pub ${{ matrix.repo }}@${{ needs.release.outputs.container_digest }}
+
+      - name: Logout from Container registries
+        if: ${{ always() }}
+        run: |
+          docker logout
+          docker logout ghcr.io
+          rm -f cosign.key

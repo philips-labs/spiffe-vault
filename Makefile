@@ -21,6 +21,9 @@ LDFLAGS="-X $(PKG).GitVersion=$(GIT_VERSION) -X $(PKG).gitCommit=$(GIT_HASH) -X 
 GO_BUILD_FLAGS := -trimpath -ldflags $(LDFLAGS)
 COMMANDS       := spiffe-vault
 
+HUB_REPO := philipssoftware/spiffe-vault
+GHCR_REPO := ghcr.io/philips-labs/spiffe-vault
+
 .PHONY: help
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-25s\033[0m %s\n", $$1, $$2}'
@@ -40,8 +43,11 @@ build: $(addprefix bin/,$(COMMANDS)) ## builds binaries
 .PHONY: image
 image: ## build the binary in a docker image
 	docker build \
-		-t "philipssoftware/spiffe-vault:$(GIT_TAG)" \
-		-t "philipssoftware/spiffe-vault:$(GIT_HASH)" .
+		-t "$(HUB_REPO):$(GIT_TAG)" \
+		-t "$(HUB_REPO):$(GIT_HASH)" \
+		-t "$(GHCR_REPO):$(GIT_TAG)" \
+		-t "$(GHCR_REPO):$(GIT_HASH)" \
+		.
 
 .PHONY: snapshot-release
 snapshot-release: ## creates a snapshot release using goreleaser
@@ -86,3 +92,18 @@ coverage-html: coverage.out ## Ouput code coverage as HTML
 .PHONY: outdated
 outdated: ## Checks for outdated dependencies
 	go list -u -m -json all | go-mod-outdated -update
+
+.PHONY: container-digest
+container-digest: ## retrieves the container digest from the given tag
+	@:$(call check_defined, GITHUB_REF)
+	@docker inspect $(GHCR_REPO):$(subst refs/tags/,,$(GITHUB_REF)) --format '{{ index .RepoDigests 0 }}' | cut -d '@' -f 2
+
+.PHONY: container-tags
+container-tags: ## retrieves the container tags applied to the image with a given digest
+	@:$(call check_defined, CONTAINER_DIGEST)
+	@docker inspect $(GHCR_REPO)@$(CONTAINER_DIGEST) --format '{{ join .RepoTags "\n" }}' | sed 's/.*://' | awk '!_[$$0]++'
+
+.PHONY: container-repos
+container-repos: ## retrieves the container tags applied to the image with a given digest
+	@:$(call check_defined, CONTAINER_DIGEST)
+	@docker inspect $(GHCR_REPO)@$(CONTAINER_DIGEST) --format '{{ join .RepoTags "\n" }}' | sed 's/:.*//' | awk '!_[$$0]++'
