@@ -54,6 +54,8 @@ dockers:
       - "Makefile"
       - "go.mod"
       - "go.sum"
+      - ".git"
+      - ".gitignore"
       - "cmd"
       - "pkg"
 checksum:
