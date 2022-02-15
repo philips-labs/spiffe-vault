@@ -11,14 +11,17 @@ builds:
   - id: binary
     dir: cmd/spiffe-vault
     goos:
-      - windows
-      - darwin
       - linux
+      - darwin
+      - windows
     goarch:
       - amd64
       - arm64
     goarm:
-      - 8
+      - "8"
+    mod_timestamp: '{{ .CommitTimestamp }}'
+    flags:
+      - -trimpath
     ldflags:
       - "{{ .Env.LDFLAGS }}"
 
@@ -115,14 +118,23 @@ snapshot:
 
 changelog:
   sort: asc
+  use: github
   filters:
     exclude:
       - '^docs:'
       - '^test:'
       - Merge pull request
       - Merge branch
+  groups:
+    - title: 'Other changes'
+      order: 0
+    - title: Version Bumps
+      regexp: "^Bump .*$"
+      order: 10
 
 release:
   prerelease: auto
   extra_files:
     - glob: "./cosign.pub"
+  footer: |
+    **Full Changelog**: https://github.com/philips-labs/slsa-provenance-action/compare/{{ .PreviousTag }}...{{ .Tag }}
