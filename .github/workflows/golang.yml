@@ -178,7 +178,7 @@ jobs:
           curl_args+=(-H "Content-Type: $(file -b --mime-type "${SIGNATURE}")")
           curl "${curl_args[@]}" \
             --data-binary @"${SIGNATURE}" \
-            "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${release_id}/assets?name=${signature}"
+            "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${release_id}/assets?name=${SIGNATURE}"
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
