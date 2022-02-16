@@ -159,6 +159,31 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v2.0.0
+        with:
+          cosign-release: 'v1.5.1'
+
+      - name: Sign provenance
+        run: |
+          echo '${{ secrets.COSIGN_PRIVATE_KEY }}' > cosign.key
+          cosign sign-blob --key cosign.key --output-signature "${SIGNATURE}" provenance.att
+          cat "${SIGNATURE}"
+
+          curl_args=(-s -H "Authorization: token ${GITHUB_TOKEN}")
+          curl_args+=(-H "Accept: application/vnd.github.v3+json")
+          release_id="$(curl "${curl_args[@]}" "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/releases?per_page=10" | jq "map(select(.name == \"${GITHUB_REF_NAME}\"))" | jq -r '.[0].id')"
+
+          echo "Upload ${SIGNATURE} to release with id ${release_id}…"
+          curl_args+=(-H "Content-Type: $(file -b --mime-type "${SIGNATURE}")")
+          curl "${curl_args[@]}" \
+            --data-binary @"${SIGNATURE}" \
+            "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${release_id}/assets?name=${signature}"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+          SIGNATURE: provenance.att.sig
+
   container-provenance:
     name: container-provenance
     needs: [release]
