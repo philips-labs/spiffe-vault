@@ -14,11 +14,15 @@ ifeq ($(DIFF), 1)
     GIT_TREESTATE = "dirty"
 endif
 
-PKG=github.com/philips-labs/spiffe-vault/cmd/spiffe-vault/cli
+MOD=github.com/philips-labs/spiffe-vault
+PKG=$(MOD)/cmd/spiffe-vault/cli
 LDFLAGS="-X $(PKG).GitVersion=$(GIT_VERSION) -X $(PKG).gitCommit=$(GIT_HASH) -X $(PKG).gitTreeState=$(GIT_TREESTATE) -X $(PKG).buildDate=$(BUILD_DATE)"
 
 GO_BUILD_FLAGS := -trimpath -ldflags $(LDFLAGS)
 COMMANDS       := spiffe-vault
+
+HUB_REPO := philipssoftware/spiffe-vault
+GHCR_REPO := ghcr.io/philips-labs/spiffe-vault
 
 .PHONY: help
 help:
@@ -39,8 +43,11 @@ build: $(addprefix bin/,$(COMMANDS)) ## builds binaries
 .PHONY: image
 image: ## build the binary in a docker image
 	docker build \
-		-t "philipssoftware/spiffe-vault:$(GIT_TAG)" \
-		-t "philipssoftware/spiffe-vault:$(GIT_HASH)" .
+		-t "$(HUB_REPO):$(GIT_TAG)" \
+		-t "$(HUB_REPO):$(GIT_HASH)" \
+		-t "$(GHCR_REPO):$(GIT_TAG)" \
+		-t "$(GHCR_REPO):$(GIT_HASH)" \
+		.
 
 .PHONY: snapshot-release
 snapshot-release: ## creates a snapshot release using goreleaser
@@ -65,14 +72,14 @@ lint: $(GO_PATH)/bin/goimports $(GO_PATH)/bin/golint ## runs linting
 	@echo Linting using golint
 	@golint -set_exit_status $(shell go list -f '{{ .Dir }}' ./...)
 	@echo Linting imports
-	@goimports -d -e -local github.com/philips-labs/spiffe-vault $(shell go list -f '{{ .Dir }}' ./...)
+	@goimports -d -e -local $(MOD) $(shell go list -f '{{ .Dir }}' ./...)
 
 .PHONY: test
 test: ## runs the tests
 	go test -race -v -count=1 ./...
 
 coverage.out: FORCE
-	go test -race -v -count=1 -covermode=atomic -coverprofile=coverage.out ./...
+	go test -race -v -count=1 -covermode=atomic -coverprofile=$@ ./...
 
 .PHONY: coverage.out
 coverage-out: coverage.out ## Ouput code coverage to stdout
@@ -85,3 +92,18 @@ coverage-html: coverage.out ## Ouput code coverage as HTML
 .PHONY: outdated
 outdated: ## Checks for outdated dependencies
 	go list -u -m -json all | go-mod-outdated -update
+
+.PHONY: container-digest
+container-digest: ## retrieves the container digest from the given tag
+	@:$(call check_defined, GITHUB_REF)
+	@docker inspect $(GHCR_REPO):$(subst refs/tags/,,$(GITHUB_REF)) --format '{{ index .RepoDigests 0 }}' | cut -d '@' -f 2
+
+.PHONY: container-tags
+container-tags: ## retrieves the container tags applied to the image with a given digest
+	@:$(call check_defined, CONTAINER_DIGEST)
+	@docker inspect $(GHCR_REPO)@$(CONTAINER_DIGEST) --format '{{ join .RepoTags "\n" }}' | sed 's/.*://' | awk '!_[$$0]++'
+
+.PHONY: container-repos
+container-repos: ## retrieves the container tags applied to the image with a given digest
+	@:$(call check_defined, CONTAINER_DIGEST)
+	@docker inspect $(GHCR_REPO)@$(CONTAINER_DIGEST) --format '{{ join .RepoTags "\n" }}' | sed 's/:.*//' | awk '!_[$$0]++'
