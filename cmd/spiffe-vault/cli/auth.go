@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/peterbourgon/ff/v3/ffcli"
@@ -49,9 +50,8 @@ func Auth() *ffcli.Command {
 			if err != nil {
 				return err
 			}
-
-			fmt.Println("# Export following environment variable to authenticate to Hashicorp Vault")
-			fmt.Printf("export VAULT_TOKEN=%s\n", c.Token())
+			fmt.Fprintln(os.Stderr, "# Export following environment variable to authenticate to Hashicorp Vault")
+			fmt.Fprintf(os.Stdout, "export VAULT_TOKEN=%s\n", c.Token())
 
 			return nil
 		},
