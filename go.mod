@@ -1,6 +1,6 @@
 module github.com/philips-labs/spiffe-vault
 
-go 1.17
+go 1.18
 
 require (
 	github.com/hashicorp/vault/api v1.7.2
