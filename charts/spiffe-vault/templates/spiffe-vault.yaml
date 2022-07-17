@@ -36,9 +36,11 @@ spec:
         - name: spire-agent-sockets
           mountPath: /var/run/spire/sockets
           readOnly: true
+      {{- if .Values.docker.enabled }}
         - name: docker-certs
           mountPath: /certs/client
           readOnly: true
+      {{- end }}
     {{- if .Values.docker.enabled }}
     - name: dind-daemon
       securityContext:
@@ -53,8 +55,10 @@ spec:
       volumeMounts:
         - name: docker-graph-storage
           mountPath: /var/lib/docker
+      {{- if .Values.docker.enabled }}
         - name: docker-certs
           mountPath: /certs/client
+      {{- end }}
     {{- end }}
   restartPolicy: OnFailure
   {{- with .Values.nodeSelector }}

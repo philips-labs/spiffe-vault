@@ -20,4 +20,5 @@ ENV VAULT_ADDR=
 COPY --from=certs /etc/ssl/certs /etc/ssl/certs
 COPY --from=builder build/bin/spiffe-vault /usr/local/bin/spiffe-vault
 COPY --from=vault-binary bin/vault /usr/local/bin/vault
+COPY --from=gcr.io/projectsigstore/cosign:v1.9.1 /ko-app/cosign /usr/local/bin/cosign
 ENTRYPOINT [ "/usr/local/bin/spiffe-vault" ]
