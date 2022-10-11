@@ -83,7 +83,7 @@ jobs:
       - name: Install cosign
         uses: sigstore/cosign-installer@v2.8.0
         with:
-          cosign-release: 'v1.12.1'
+          cosign-release: 'v1.13.0'
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -162,7 +162,7 @@ jobs:
       - name: Install cosign
         uses: sigstore/cosign-installer@v2.8.0
         with:
-          cosign-release: 'v1.12.1'
+          cosign-release: 'v1.13.0'
 
       - name: Sign provenance
         run: |
@@ -198,7 +198,7 @@ jobs:
       - name: Install cosign
         uses: sigstore/cosign-installer@v2.8.0
         with:
-          cosign-release: 'v1.12.1'
+          cosign-release: 'v1.13.0'
 
       - name: Generate provenance for ${{ matrix.repo }}
         uses: philips-labs/slsa-provenance-action@v0.8.0
