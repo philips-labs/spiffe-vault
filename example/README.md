@@ -35,12 +35,15 @@ Now we will deploy the Helm charts to our Kubernetes cluster. In case you run Ra
 helm -n spire-system upgrade spire philips-labs/spire --version 0.6.3 --create-namespace --install -f k8s/spire-values.yaml
 kubectl describe ingressclasses.networking.k8s.io traefik ||
 helm -n traefik-system upgrade traefik traefik/traefik --version 20.1.1 --create-namespace --install -f k8s/traefik-values.yaml
-helm -n my-vault install vault hashicorp/vault --create-namespace -f k8s/vault-values.yaml
+helm -n vault-system upgrade vault hashicorp/vault --version 0.22.1 --create-namespace --install -f k8s/vault-values.yaml
 ```
 
 ### Provision Vault
 
-> :warning: Add `vault.localhost` to your hosts file (`/etc/hosts`).
+> **Note**: Add `vault.localhost` to your hosts file (`/etc/hosts`).
+>
+> As we deployed vault in development mode you can navigate to `http://vault.localhost` and
+> login on the UI using the token `root` (You should never ever deploy vault in development mode to production environments).
 
 Once the core infrastructure is deployed we will have to provision the authentication method to [Vault][hashi-vault]. Terraform will also provision a transit engine which I use in the example below. Also note the Vault policy prevents you from doing any other operations then allowed by the policy. Doing so enables us to have finegrained access to different resources in Vault.
 
@@ -116,7 +119,6 @@ A practical usecase for using the transit engine is for example in combination w
 $ kubectl exec -n my-app -i -t \
     $(kubectl -n my-app get pods -l app.kubernetes.io/name=spiffe-vault -o jsonpath="{.items[0].metadata.name}") \
     -c spiffe-vault -- sh
-$ export VAULT_ADDR=http://vault-internal.my-vault:8200
 $ docker login
 Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com to create one.
 Username: marcofranssen
