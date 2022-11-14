@@ -78,7 +78,6 @@ The flow below will perform the following steps.
 $ kubectl exec -n my-app -i -t \
     $(kubectl -n my-app get pods -l app.kubernetes.io/name=spiffe-vault -o jsonpath="{.items[0].metadata.name}") \
     -c spiffe-vault -- sh
-$ export VAULT_ADDR=http://vault-internal.my-vault:8200
 $ eval "$(spiffe-vault auth -role local)"
 $ vault list transit/keys
 Keys

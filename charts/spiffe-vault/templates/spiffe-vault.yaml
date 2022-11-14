@@ -29,6 +29,8 @@ spec:
           value: "1"
         - name: DOCKER_CERT_PATH
           value: /certs/client
+        - name: VAULT_ADDR
+          value: {{ .Values.vault.address }}
       {{- end }}
       resources:
         {{- toYaml .Values.resources | nindent 12 }}
