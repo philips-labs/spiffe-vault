@@ -29,11 +29,12 @@ helm repo update
 
 ### Install
 
-Now we will deploy the Helm charts to our Kubernetes cluster.
+Now we will deploy the Helm charts to our Kubernetes cluster. In case you run Rancher Desktop, Traefik will already be there and below script will check that for you.
 
 ```bash
 helm -n spire-system upgrade spire philips-labs/spire --version 0.6.3 --create-namespace --install -f k8s/spire-values.yaml
-helm -n my-traefik install traefik traefik/traefik --create-namespace -f k8s/traefik-values.yaml
+kubectl describe ingressclasses.networking.k8s.io traefik ||
+helm -n traefik-system upgrade traefik traefik/traefik --version 20.1.1 --create-namespace --install -f k8s/traefik-values.yaml
 helm -n my-vault install vault hashicorp/vault --create-namespace -f k8s/vault-values.yaml
 ```
 
