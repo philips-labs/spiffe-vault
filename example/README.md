@@ -32,7 +32,7 @@ helm repo update
 Now we will deploy the Helm charts to our Kubernetes cluster.
 
 ```bash
-helm -n my-spire install spire philips-labs/spire --create-namespace -f k8s/spire-values.yaml
+helm -n spire-system upgrade spire philips-labs/spire --version 0.6.3 --create-namespace --install -f k8s/spire-values.yaml
 helm -n my-traefik install traefik traefik/traefik --create-namespace -f k8s/traefik-values.yaml
 helm -n my-vault install vault hashicorp/vault --create-namespace -f k8s/vault-values.yaml
 ```
