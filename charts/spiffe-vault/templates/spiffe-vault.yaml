@@ -33,8 +33,8 @@ spec:
       resources:
         {{- toYaml .Values.resources | nindent 12 }}
       volumeMounts:
-        - name: spire-agent-sockets
-          mountPath: /var/run/spire/sockets
+        - name: spiffe-workload-api
+          mountPath: /spiffe-workload-api
           readOnly: true
       {{- if .Values.docker.enabled }}
         - name: docker-certs
@@ -74,10 +74,10 @@ spec:
     {{- toYaml . | nindent 8 }}
   {{- end }}
   volumes:
-    - name: spire-agent-sockets
-      hostPath:
-        path: /run/spire/agent-sockets
-        type: DirectoryOrCreate
+    - name: spiffe-workload-api
+      csi:
+        driver: "csi.spiffe.io"
+        readOnly: true
     {{- if .Values.docker.enabled }}
     - name: docker-graph-storage
       emptyDir: {}
