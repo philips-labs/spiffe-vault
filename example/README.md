@@ -29,17 +29,21 @@ helm repo update
 
 ### Install
 
-Now we will deploy the Helm charts to our Kubernetes cluster.
+Now we will deploy the Helm charts to our Kubernetes cluster. In case you run Rancher Desktop, Traefik will already be there and below script will check that for you.
 
 ```bash
-helm -n my-spire install spire philips-labs/spire --create-namespace -f k8s/spire-values.yaml
-helm -n my-traefik install traefik traefik/traefik --create-namespace -f k8s/traefik-values.yaml
-helm -n my-vault install vault hashicorp/vault --create-namespace -f k8s/vault-values.yaml
+helm -n spire-system upgrade spire philips-labs/spire --version 0.6.3 --create-namespace --install -f k8s/spire-values.yaml
+kubectl describe ingressclasses.networking.k8s.io traefik ||
+helm -n traefik-system upgrade traefik traefik/traefik --version 20.1.1 --create-namespace --install -f k8s/traefik-values.yaml
+helm -n vault-system upgrade vault hashicorp/vault --version 0.22.1 --create-namespace --install -f k8s/vault-values.yaml
 ```
 
 ### Provision Vault
 
-> :warning: Add `vault.localhost` to your hosts file (`/etc/hosts`).
+> **Note**: Add `vault.localhost` to your hosts file (`/etc/hosts`).
+>
+> As we deployed vault in development mode you can navigate to `http://vault.localhost` and
+> login on the UI using the token `root` (You should never ever deploy vault in development mode to production environments).
 
 Once the core infrastructure is deployed we will have to provision the authentication method to [Vault][hashi-vault]. Terraform will also provision a transit engine which I use in the example below. Also note the Vault policy prevents you from doing any other operations then allowed by the policy. Doing so enables us to have finegrained access to different resources in Vault.
 
@@ -59,8 +63,9 @@ In `k8s/spiffe-vault.yaml` we defined we want to use the `philipssoftware/spiffe
 Let's build this custom build now and then deploy our workload to Kubernetes.
 
 ```bash
+# from the example folder
 docker build -t philipssoftware/spiffe-vault-cosign:latest spiffe-vault-cosign
-helm -n my-app install my-app ../charts/spiffe-vault --create-namespace -f k8s/spiffe-vault.yaml
+helm -n my-app upgrade my-app ../charts/spiffe-vault --create-namespace --install -f k8s/spiffe-vault.yaml
 ```
 
 ### play with spiffe-vault
@@ -78,7 +83,6 @@ The flow below will perform the following steps.
 $ kubectl exec -n my-app -i -t \
     $(kubectl -n my-app get pods -l app.kubernetes.io/name=spiffe-vault -o jsonpath="{.items[0].metadata.name}") \
     -c spiffe-vault -- sh
-$ export VAULT_ADDR=http://vault-internal.my-vault:8200
 $ eval "$(spiffe-vault auth -role local)"
 $ vault list transit/keys
 Keys
@@ -116,7 +120,6 @@ A practical usecase for using the transit engine is for example in combination w
 $ kubectl exec -n my-app -i -t \
     $(kubectl -n my-app get pods -l app.kubernetes.io/name=spiffe-vault -o jsonpath="{.items[0].metadata.name}") \
     -c spiffe-vault -- sh
-$ export VAULT_ADDR=http://vault-internal.my-vault:8200
 $ docker login
 Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com to create one.
 Username: marcofranssen
@@ -134,17 +137,22 @@ The push refers to repository [docker.io/marcofranssen/busybox]
 cfd97936a580: Mounted from library/busybox
 latest: digest: sha256:febcf61cd6e1ac9628f6ac14fa40836d16f3c6ddef3b303ff0321606e55ddd0b size: 527
 $ eval "$(spiffe-vault auth -role local)"
-$ cosign sign -key hashivault://cosign marcofranssen/busybox:latest
-Pushing signature to: index.docker.io/marcofranssen/busybox:sha256-febcf61cd6e1ac9628f6ac14fa40836d16f3c6ddef3b303ff0321606e55ddd0b.sig
-$ cosign verify -key hashivault://cosign marcofranssen/busybox:latest
+$ cosign sign --key hashivault://cosign marcofranssen/busybox:latest
+WARNING: Image reference marcofranssen/busybox:latest uses a tag, not a digest, to identify the image to sign.
 
-Verification for marcofranssen/busybox:latest --
+This can lead you to sign a different image than the intended one. Please use a
+digest (example.com/ubuntu@sha256:abc123...) rather than tag
+(example.com/ubuntu:latest) for the input to cosign. The ability to refer to
+images by tag will be removed in a future release.
+Pushing signature to: index.docker.io/marcofranssen/busybox
+$ cosign verify --key hashivault://cosign marcofranssen/busybox:latest
+
+Verification for index.docker.io/marcofranssen/busybox:latest --
 The following checks were performed on each of these signatures:
   - The cosign claims were validated
   - The signatures were verified against the specified public key
-  - Any certificates were verified against the Fulcio roots.
 
-[{"critical":{"identity":{"docker-reference":"index.docker.io/marcofranssen/busybox"},"image":{"docker-manifest-digest":"sha256:febcf61cd6e1ac9628f6ac14fa40836d16f3c6ddef3b303ff0321606e55ddd0b"},"type":"cosign container image signature"},"optional":null}]
+[{"critical":{"identity":{"docker-reference":"index.docker.io/marcofranssen/busybox"},"image":{"docker-manifest-digest":"sha256:dacd1aa51e0b27c0e36c4981a7a8d9d8ec2c4a74bf125c0a44d0709497a522e9"},"type":"cosign container image signature"},"optional":null}]
 ```
 
 [kubernetes]: https://kubernetes.io "Production-Grade Container Orchestration"

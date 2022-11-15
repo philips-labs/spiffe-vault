@@ -10,5 +10,5 @@ variable "roles" {
 variable "oidc_discovery_url" {
   type        = string
   description = "The discovery url of the oidc service"
-  default     = "http://spire-oidc.my-spire"
+  default     = "http://spire-oidc.spire-system"
 }

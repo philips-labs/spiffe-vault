@@ -8,12 +8,8 @@ import (
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 )
 
-const (
-	socketPath = "unix:///var/run/spire/sockets/agent.sock"
-)
-
 // FetchJWT retrieves a JWT SVID upon successfull attestation
-func FetchJWT(ctx context.Context, audience string) (string, error) {
+func FetchJWT(ctx context.Context, socketPath, audience string) (string, error) {
 	clientOptions := workloadapi.WithClientOptions(workloadapi.WithAddr(socketPath))
 
 	jwtSource, err := workloadapi.NewJWTSource(ctx, clientOptions)
