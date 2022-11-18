@@ -102,10 +102,10 @@ jobs:
           make release-vars > /tmp/spiffe-vault-release-vars.env
           source /tmp/spiffe-vault-release-vars.env
           if [[ -n "$LDFLAGS" ]]; then
-            echo "::set-output name=LDFLAGS::$LDFLAGS"
+            echo "ldflags=$LDFLAGS" >> $GITHUB_OUTPUT
           fi
           if [[ -n "$GIT_HASH" ]]; then
-            echo "::set-output name=GIT_HASH::$GIT_HASH"
+            echo "git_hash=$GIT_HASH" >> $GITHUB_OUTPUT
           fi
           rm -f /tmp/spiffe-vault-release-vars.env
 
@@ -119,9 +119,9 @@ jobs:
           version: latest
           args: release --rm-dist ${{ (!startsWith(github.ref, 'refs/tags/') && '--snapshot') || '' }}
         env:
+          LDFLAGS: ${{ steps.release-vars.outputs.ldflags }}
+          GIT_HASH: ${{ steps.release-vars.outputs.git_hash }}
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          LDFLAGS: ${{ steps.release-vars.outputs.LDFLAGS }}
-          GIT_HASH: ${{ steps.release-vars.outputs.GIT_HASH }}
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
 
       - name: Get container info
@@ -129,9 +129,9 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           export CONTAINER_DIGEST=$(make container-digest GITHUB_REF=${{ github.ref_name }})
-          echo "::set-output name=container_digest::$CONTAINER_DIGEST"
-          echo "::set-output name=container_tags::$(make container-tags CONTAINER_DIGEST="${CONTAINER_DIGEST}" | paste -s -d ',' -)"
-          echo "::set-output name=container_repos::$(make container-repos CONTAINER_DIGEST="${CONTAINER_DIGEST}" | jq --raw-input . | jq --slurp -c)"
+          echo "container_digest=$CONTAINER_DIGEST" >> $GITHUB_OUTPUT
+          echo "container_tags=$(make container-tags CONTAINER_DIGEST="${CONTAINER_DIGEST}" | paste -s -d ',' -)" >> $GITHUB_OUTPUT
+          echo "container_repos=$(make container-repos CONTAINER_DIGEST="${CONTAINER_DIGEST}" | jq --raw-input . | jq --slurp -c)" >> $GITHUB_OUTPUT
 
       - name: Logout from container registries
         if: ${{ always() }}
