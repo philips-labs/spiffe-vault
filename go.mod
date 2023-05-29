@@ -6,7 +6,7 @@ require (
 	github.com/hashicorp/vault/api v1.9.1
 	github.com/peterbourgon/ff/v3 v3.3.1
 	github.com/pkg/errors v0.9.1
-	github.com/spiffe/go-spiffe/v2 v2.1.4
+	github.com/spiffe/go-spiffe/v2 v2.1.5
 	github.com/stretchr/testify v1.8.3
 )
 
