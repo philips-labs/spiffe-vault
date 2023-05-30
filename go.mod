@@ -3,7 +3,7 @@ module github.com/philips-labs/spiffe-vault
 go 1.18
 
 require (
-	github.com/hashicorp/vault/api v1.9.1
+	github.com/hashicorp/vault/api v1.9.2
 	github.com/peterbourgon/ff/v3 v3.3.1
 	github.com/pkg/errors v0.9.1
 	github.com/spiffe/go-spiffe/v2 v2.1.5
@@ -46,6 +46,5 @@ require (
 	google.golang.org/grpc v1.53.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
-	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
