@@ -26,15 +26,6 @@ jobs:
           go-version-file: go.mod
           check-latest: true
 
-      - name: Cache Go modules
-        uses: actions/cache@v3.3.1
-        id: go-mod-cache
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
       - name: Get dependencies
         run: go mod download
 
