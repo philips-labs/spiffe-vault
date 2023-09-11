@@ -50,11 +50,11 @@ image: ## build the binary in a docker image
 		.
 
 .PHONY: snapshot-release
-snapshot-release: ## creates a snapshot release using goreleaser
-	LDFLAGS=$(LDFLAGS) GIT_TAG=$(GIT_TAG) GIT_HASH=$(GIT_HASH) goreleaser release --snapshot --rm-dist
+snapshot-release: $(GO_PATH)/bin/goreleaser ## creates a snapshot release using goreleaser
+	LDFLAGS=$(LDFLAGS) GIT_TAG=$(GIT_TAG) GIT_HASH=$(GIT_HASH) goreleaser release --snapshot --clean
 
 .PHONY: release
-release: ## creates a release using goreleaser
+release: $(GO_PATH)/bin/goreleaser ## creates a release using goreleaser
 	LDFLAGS=$(LDFLAGS) GIT_TAG=$(GIT_TAG) GIT_HASH=$(GIT_HASH) goreleaser release
 
 release-vars: ## print the release variables for goreleaser
@@ -66,6 +66,9 @@ $(GO_PATH)/bin/goimports:
 
 $(GO_PATH)/bin/golint:
 	go install golang.org/x/lint/golint@latest
+
+$(GO_PATH)/bin/goreleaser:
+	go install github.com/goreleaser/goreleaser@latest
 
 .PHONY: lint
 lint: $(GO_PATH)/bin/goimports $(GO_PATH)/bin/golint ## runs linting

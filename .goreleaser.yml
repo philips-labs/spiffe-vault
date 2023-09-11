@@ -28,8 +28,6 @@ builds:
 archives:
   - id: archive
     format: tar.gz
-    replacements:
-      darwin: macOS
     files:
       - LICENSE*
       - README*
@@ -47,7 +45,7 @@ dockers:
       - "ghcr.io/philips-labs/{{ .ProjectName }}:{{ .FullCommit }}"
     build_flag_templates:
       - "--pull"
-      - "--label=com.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
       - "--label=org.opencontainers.image.description={{.ProjectName}}"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
@@ -73,6 +71,7 @@ signs:
     artifacts: checksum
     args:
       - sign-blob
+      - --yes
       - --key
       - cosign.key
       - '--output-certificate=${certificate}'
@@ -85,6 +84,7 @@ signs:
     artifacts: binary
     args:
       - sign-blob
+      - --yes
       - --key
       - cosign.key
       - '--output-certificate=${certificate}'
@@ -97,6 +97,7 @@ signs:
     artifacts: archive
     args:
       - sign-blob
+      - --yes
       - --key
       - cosign.key
       - '--output-certificate=${certificate}'
@@ -104,11 +105,13 @@ signs:
       - '${artifact}'
 
 docker_signs:
-  - cmd: cosign
-    artifacts: all
+  - artifacts: all
+    cmd: cosign
+    stdin: '{{ .Env.COSIGN_PASSWORD }}'
     output: true
     args:
       - 'sign'
+      - --yes
       - --key
       - cosign.key
       - '${artifact}'
