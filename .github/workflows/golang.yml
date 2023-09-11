@@ -81,9 +81,9 @@ jobs:
           check-latest: true
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3.1.1
+        uses: sigstore/cosign-installer@v3.1.2
         with:
-          cosign-release: 'v2.1.1'
+          cosign-release: 'v2.2.0'
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -160,9 +160,9 @@ jobs:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3.1.1
+        uses: sigstore/cosign-installer@v3.1.2
         with:
-          cosign-release: 'v2.1.1'
+          cosign-release: 'v2.2.0'
 
       - name: Sign provenance
         run: |
@@ -196,9 +196,9 @@ jobs:
 
     steps:
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3.1.1
+        uses: sigstore/cosign-installer@v3.1.2
         with:
-          cosign-release: 'v2.1.1'
+          cosign-release: 'v2.2.0'
 
       - name: Generate provenance for ${{ matrix.repo }}
         uses: philips-labs/slsa-provenance-action@v0.8.0
