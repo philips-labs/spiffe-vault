@@ -71,6 +71,7 @@ signs:
     artifacts: checksum
     args:
       - sign-blob
+      - --yes
       - --key
       - cosign.key
       - '--output-certificate=${certificate}'
@@ -83,6 +84,7 @@ signs:
     artifacts: binary
     args:
       - sign-blob
+      - --yes
       - --key
       - cosign.key
       - '--output-certificate=${certificate}'
@@ -95,6 +97,7 @@ signs:
     artifacts: archive
     args:
       - sign-blob
+      - --yes
       - --key
       - cosign.key
       - '--output-certificate=${certificate}'
@@ -102,11 +105,13 @@ signs:
       - '${artifact}'
 
 docker_signs:
-  - cmd: cosign
-    artifacts: all
+  - artifacts: all
+    cmd: cosign
+    stdin: '{{ .Env.COSIGN_PASSWORD }}'
     output: true
     args:
       - 'sign'
+      - --yes
       - --key
       - cosign.key
       - '${artifact}'
