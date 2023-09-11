@@ -17,14 +17,14 @@ jobs:
     name: Continuous Integration
 
     steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
       - name: Set up Go
         uses: actions/setup-go@v4.1.0
         with:
-          go-version: 1.18
+          go-version-file: go.mod
           check-latest: true
-
-      - name: Check out code
-        uses: actions/checkout@v3
 
       - name: Cache Go modules
         uses: actions/cache@v3.3.1
@@ -74,21 +74,21 @@ jobs:
       container_repos: ${{ steps.container_info.outputs.container_repos }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
       - name: Set up Go
         uses: actions/setup-go@v4.1.0
         with:
-          go-version: 1.18
+          go-version-file: go.mod
           check-latest: true
 
       - name: Install cosign
         uses: sigstore/cosign-installer@v3.1.2
         with:
           cosign-release: 'v2.2.0'
-
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Login to container registries
         if: startsWith(github.ref, 'refs/tags/')
