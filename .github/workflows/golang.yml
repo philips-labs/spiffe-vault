@@ -105,7 +105,7 @@ jobs:
           echo '${{ secrets.COSIGN_PRIVATE_KEY }}' > cosign.key
 
       - name: Release ${{ (!startsWith(github.ref, 'refs/tags/') && 'snapshot') || '' }}
-        uses: goreleaser/goreleaser-action@v4
+        uses: goreleaser/goreleaser-action@v5
         with:
           version: latest
           args: release --clean ${{ (!startsWith(github.ref, 'refs/tags/') && '--snapshot') || '' }}
