@@ -1,5 +1,5 @@
 image:
-  repository: philipssoftware/spiffe-vault-cosign
+  repository: ghcr.io/philips-labs/spiffe-vault-cosign
   tag: latest
 
 docker:

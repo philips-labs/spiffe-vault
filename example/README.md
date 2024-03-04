@@ -58,13 +58,13 @@ terraform apply -auto-approve
 
 Within kubernetes our Spire Helm chart also deploys the [spire-k8s-workload-registrar][spire-k8s-workload-registrar]. This Spire component takes care of registering workloads/pods with the Spire server. Once a workload is registered with the Spire Server it will be given a SPIFFE ID.
 
-In `k8s/spiffe-vault.yaml` we defined we want to use the `philipssoftware/spiffe-vault-cosign` image that adds the [Cosign][cosign] binary in the image as well. So we can also play with cosign later in this example.
+In `k8s/spiffe-vault.yaml` we defined we want to use the `ghcr.io/philips-labs/spiffe-vault-cosign` image that adds the [Cosign][cosign] binary in the image as well. So we can also play with cosign later in this example.
 
 Let's build this custom build now and then deploy our workload to Kubernetes.
 
 ```bash
 # from the example folder
-docker build -t philipssoftware/spiffe-vault-cosign:latest spiffe-vault-cosign
+docker build -t ghcr.io/philips-labs/spiffe-vault-cosign:latest spiffe-vault-cosign
 helm -n my-app upgrade my-app ../charts/spiffe-vault --create-namespace --install -f k8s/spiffe-vault.yaml
 ```
 

@@ -84,7 +84,6 @@ jobs:
       - name: Login to container registries
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u philipssoftware --password-stdin
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin ghcr.io
 
       - name: Set release variables
@@ -127,7 +126,6 @@ jobs:
       - name: Logout from container registries
         if: ${{ always() }}
         run: |
-          docker logout
           docker logout ghcr.io
 
       - name: Cleanup signing keys
@@ -207,7 +205,6 @@ jobs:
       - name: Login to Container registries
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u philipssoftware --password-stdin
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin ghcr.io
 
       - name: Attach provenance to image
@@ -225,6 +222,5 @@ jobs:
       - name: Logout from Container registries
         if: ${{ always() }}
         run: |
-          docker logout
           docker logout ghcr.io
           rm -f cosign.key

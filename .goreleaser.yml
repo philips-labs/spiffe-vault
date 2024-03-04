@@ -39,8 +39,6 @@ dockers:
   - goos: linux
     goarch: amd64
     image_templates:
-      - "philipssoftware/{{ .ProjectName }}:v{{ .Version }}"
-      - "philipssoftware/{{ .ProjectName }}:{{ .FullCommit }}"
       - "ghcr.io/philips-labs/{{ .ProjectName }}:v{{ .Version }}"
       - "ghcr.io/philips-labs/{{ .ProjectName }}:{{ .FullCommit }}"
     build_flag_templates:

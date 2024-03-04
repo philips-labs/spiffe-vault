@@ -21,7 +21,6 @@ LDFLAGS="-X $(PKG).GitVersion=$(GIT_VERSION) -X $(PKG).gitCommit=$(GIT_HASH) -X 
 GO_BUILD_FLAGS := -trimpath -ldflags $(LDFLAGS)
 COMMANDS       := spiffe-vault
 
-HUB_REPO := philipssoftware/spiffe-vault
 GHCR_REPO := ghcr.io/philips-labs/spiffe-vault
 
 .PHONY: help
@@ -43,8 +42,6 @@ build: $(addprefix bin/,$(COMMANDS)) ## builds binaries
 .PHONY: image
 image: ## build the binary in a docker image
 	docker build \
-		-t "$(HUB_REPO):$(GIT_TAG)" \
-		-t "$(HUB_REPO):$(GIT_HASH)" \
 		-t "$(GHCR_REPO):$(GIT_TAG)" \
 		-t "$(GHCR_REPO):$(GIT_HASH)" \
 		.

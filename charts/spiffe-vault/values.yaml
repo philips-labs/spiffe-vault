@@ -6,7 +6,7 @@ vault:
   address: http://vault-internal.vault-system:8200
 
 image:
-  repository: philipssoftware/spiffe-vault
+  repository: ghcr.io/philips-labs/spiffe-vault
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
