@@ -1,4 +1,4 @@
-FROM golang:1.22-alpine as builder
+FROM golang:1.22-alpine AS builder
 RUN mkdir build
 WORKDIR /build
 COPY go.mod go.sum ./
@@ -7,12 +7,12 @@ COPY . .
 RUN apk add --no-cache make git
 RUN make build
 
-FROM vault:1.8.2 AS vault-binary
+FROM vault:1.13.3 AS vault-binary
 
-FROM alpine:3.14.2 as certs
-RUN apk update && apk add ca-certificates
+FROM alpine:3.19.1 AS certs
+RUN apk add --no-cache ca-certificates
 
-FROM busybox:1.33.1
+FROM busybox:1.36.1
 LABEL maintainer="marco.franssen@philips.com"
 RUN mkdir -p /app
 WORKDIR /app
