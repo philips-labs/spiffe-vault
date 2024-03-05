@@ -106,12 +106,12 @@ signs:
     artifacts: checksum
     args:
       - sign-blob
-      - --yes
       - --key
       - cosign.key
       - '--output-certificate=${certificate}'
       - '--output-signature=${signature}'
       - '${artifact}'
+      - --yes
   - id: binaries
     cmd: cosign
     stdin: '{{ .Env.COSIGN_PASSWORD }}'
@@ -119,12 +119,12 @@ signs:
     artifacts: binary
     args:
       - sign-blob
-      - --yes
       - --key
       - cosign.key
       - '--output-certificate=${certificate}'
       - '--output-signature=${signature}'
       - '${artifact}'
+      - --yes
   - id: archives
     cmd: cosign
     stdin: '{{ .Env.COSIGN_PASSWORD }}'
@@ -132,12 +132,12 @@ signs:
     artifacts: archive
     args:
       - sign-blob
-      - --yes
       - --key
       - cosign.key
       - '--output-certificate=${certificate}'
       - '--output-signature=${signature}'
       - '${artifact}'
+      - --yes
 
 docker_signs:
   - artifacts: all
@@ -146,10 +146,10 @@ docker_signs:
     output: true
     args:
       - 'sign'
-      - --yes
       - --key
       - cosign.key
-      - '${artifact}'
+      - '${artifact}@${digest}'
+      - --yes
 
 snapshot:
   name_template: "{{ .Version }}-next"
@@ -173,6 +173,7 @@ changelog:
 release:
   prerelease: auto
   extra_files:
-    - glob: "./cosign.pub"
+    - glob: ./cosign.pub
+    - glob: dist/*.sig
   footer: |
     **Full Changelog**: https://github.com/philips-labs/slsa-provenance-action/compare/{{ .PreviousTag }}...{{ .Tag }}
