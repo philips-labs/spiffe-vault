@@ -22,6 +22,9 @@ GO_BUILD_FLAGS := -trimpath -ldflags $(LDFLAGS)
 COMMANDS       := spiffe-vault
 
 GHCR_REPO := ghcr.io/philips-labs/spiffe-vault
+PLATFORMS ?= linux/amd64,linux/arm64
+DOCKER_HOST ?= unix:///var/run/docker.sock
+GO_VERSION ?= 1.22
 
 .PHONY: help
 help:
@@ -39,9 +42,15 @@ download: ## download dependencies via go mod
 .PHONY: build
 build: $(addprefix bin/,$(COMMANDS)) ## builds binaries
 
+.PHONY: container-builder
+container-builder:
+	@docker buildx create --platform $(PLATFORMS) --name container-builder --node container-builder0 --use --bootstrap
+
 .PHONY: image
-image: ## build the binary in a docker image
-	docker build \
+image: container-builder ## build the binary in a docker image
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		--build-arg goversion=$(GO_VERSION) \
 		-t "$(GHCR_REPO):$(GIT_TAG)" \
 		-t "$(GHCR_REPO):$(GIT_HASH)" \
 		.
