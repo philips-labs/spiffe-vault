@@ -103,6 +103,9 @@ jobs:
         run: |
           echo '${{ secrets.COSIGN_PRIVATE_KEY }}' > cosign.key
 
+      - name: Buildx builder
+        run: make container-builder
+
       - name: Release ${{ (!startsWith(github.ref, 'refs/tags/') && 'snapshot') || '' }}
         uses: goreleaser/goreleaser-action@v5
         with:

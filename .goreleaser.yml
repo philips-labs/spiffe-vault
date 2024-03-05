@@ -39,13 +39,16 @@ dockers:
   - goos: linux
     goarch: amd64
     image_templates:
-      - "ghcr.io/philips-labs/{{ .ProjectName }}:v{{ .Version }}"
-      - "ghcr.io/philips-labs/{{ .ProjectName }}:{{ .FullCommit }}"
+      - "ghcr.io/philips-labs/{{ .ProjectName }}:v{{ .Version }}-amd64"
+      - "ghcr.io/philips-labs/{{ .ProjectName }}:{{ .FullCommit }}-amd64"
+    use: buildx
     build_flag_templates:
       - "--pull"
+      - "--platform=linux/amd64"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
       - "--label=org.opencontainers.image.description={{.ProjectName}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.licenses=MIT"
@@ -58,6 +61,42 @@ dockers:
       - ".gitignore"
       - "cmd"
       - "pkg"
+  - goos: linux
+    goarch: arm64
+    image_templates:
+      - "ghcr.io/philips-labs/{{ .ProjectName }}:v{{ .Version }}-arm64"
+      - "ghcr.io/philips-labs/{{ .ProjectName }}:{{ .FullCommit }}-arm64"
+    use: buildx
+    build_flag_templates:
+      - "--pull"
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.description={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.licenses=MIT"
+      - "--label=org.opencontainers.image.vendor=Koninklijke Philips N.V."
+    extra_files:
+      - "Makefile"
+      - "go.mod"
+      - "go.sum"
+      - ".git"
+      - ".gitignore"
+      - "cmd"
+      - "pkg"
+
+docker_manifests:
+  - name_template: 'ghcr.io/philips-labs/{{ .ProjectName }}:v{{ .Version }}'
+    image_templates:
+    - 'ghcr.io/philips-labs/{{ .ProjectName }}:v{{ .Version }}-amd64'
+    - 'ghcr.io/philips-labs/{{ .ProjectName }}:v{{ .Version }}-arm64'
+  - name_template: 'ghcr.io/philips-labs/{{ .ProjectName }}:{{ .FullCommit }}'
+    image_templates:
+    - 'ghcr.io/philips-labs/{{ .ProjectName }}:{{ .FullCommit }}-amd64'
+    - 'ghcr.io/philips-labs/{{ .ProjectName }}:{{ .FullCommit }}-arm64'
+
 checksum:
   name_template: 'checksums.txt'
 
@@ -69,12 +108,12 @@ signs:
     artifacts: checksum
     args:
       - sign-blob
-      - --yes
       - --key
       - cosign.key
       - '--output-certificate=${certificate}'
       - '--output-signature=${signature}'
       - '${artifact}'
+      - --yes
   - id: binaries
     cmd: cosign
     stdin: '{{ .Env.COSIGN_PASSWORD }}'
@@ -82,12 +121,12 @@ signs:
     artifacts: binary
     args:
       - sign-blob
-      - --yes
       - --key
       - cosign.key
       - '--output-certificate=${certificate}'
       - '--output-signature=${signature}'
       - '${artifact}'
+      - --yes
   - id: archives
     cmd: cosign
     stdin: '{{ .Env.COSIGN_PASSWORD }}'
@@ -95,12 +134,12 @@ signs:
     artifacts: archive
     args:
       - sign-blob
-      - --yes
       - --key
       - cosign.key
       - '--output-certificate=${certificate}'
       - '--output-signature=${signature}'
       - '${artifact}'
+      - --yes
 
 docker_signs:
   - artifacts: all
@@ -109,10 +148,10 @@ docker_signs:
     output: true
     args:
       - 'sign'
-      - --yes
       - --key
       - cosign.key
-      - '${artifact}'
+      - '${artifact}@${digest}'
+      - --yes
 
 snapshot:
   name_template: "{{ .Version }}-next"
@@ -136,6 +175,7 @@ changelog:
 release:
   prerelease: auto
   extra_files:
-    - glob: "./cosign.pub"
+    - glob: ./cosign.pub
+    - glob: dist/*.sig
   footer: |
     **Full Changelog**: https://github.com/philips-labs/slsa-provenance-action/compare/{{ .PreviousTag }}...{{ .Tag }}

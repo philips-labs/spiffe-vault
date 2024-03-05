@@ -15,10 +15,26 @@ Integrates [SPIFFE][spiffe] SVID authentication with [Hashicorp Vault][hashivaul
 [hashivault]: https://vaultproject.org "hashicorp Vault"
 [spiffe]: https://spiffe.io "SPIFFE"
 
-## Compile
+## Build
+
+### Compile
 
 ```bash
 make build
+```
+
+### Docker
+
+Using the default `DOCKER_HOST` on your system (usually `unix:///var/run/docker.sock`), you can build the docker image with:
+
+```bash
+make image
+```
+
+Using e.g. the colima `DOCKER_HOST` (usually `unix:///Users/marco/.colima/default/docker.sock`), you can build the docker image with:
+
+```bash
+DOCKER_HOST=unix:///Users/marco/.colima/default/docker.sock make image
 ```
 
 ## Use
