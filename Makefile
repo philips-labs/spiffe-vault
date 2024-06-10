@@ -74,7 +74,7 @@ $(GO_PATH)/bin/golint:
 	go install golang.org/x/lint/golint@latest
 
 $(GO_PATH)/bin/goreleaser:
-	go install github.com/goreleaser/goreleaser@latest
+	go install github.com/goreleaser/goreleaser/v2@latest
 
 .PHONY: lint
 lint: $(GO_PATH)/bin/goimports $(GO_PATH)/bin/golint ## runs linting
