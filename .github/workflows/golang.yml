@@ -107,7 +107,7 @@ jobs:
         run: make container-builder
 
       - name: Release ${{ (!startsWith(github.ref, 'refs/tags/') && 'snapshot') || '' }}
-        uses: goreleaser/goreleaser-action@v5
+        uses: goreleaser/goreleaser-action@v6
         with:
           version: latest
           args: release --clean ${{ (!startsWith(github.ref, 'refs/tags/') && '--snapshot') || '' }}
