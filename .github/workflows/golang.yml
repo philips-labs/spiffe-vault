@@ -48,7 +48,7 @@ jobs:
       - name: Upload Code Coverage
         uses: codecov/codecov-action@v7.1.1
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          use-oidc: true
           files: ./coverage.out
           flags: unittests
           name: codecov-umbrella
