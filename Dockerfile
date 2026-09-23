@@ -1,4 +1,4 @@
-ARG goversion=1.22
+ARG goversion=1.27
 FROM --platform=${BUILDPLATFORM} golang:${goversion}-alpine AS base
 RUN mkdir build
 WORKDIR /build
@@ -12,8 +12,8 @@ FROM --platform=${BUILDPLATFORM} base AS builder
 ARG TARGETPLATFORM
 ARG TARGETARCH
 RUN --mount=type=cache,target=/root/.cache/go-build \
-    --mount=type=cache,target=/go/pkg/mod \
-    make build
+  --mount=type=cache,target=/go/pkg/mod \
+  make build
 
 FROM --platform=${BUILDPLATFORM} vault:1.13.3 AS vault-binary
 
