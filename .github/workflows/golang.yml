@@ -32,8 +32,10 @@ jobs:
       - name: Lint
         run: |
           result=$(make lint)
-          echo $result
-          [ -n "$(echo "$result" | grep 'diff -u')" ] && exit 1 || exit 0
+          echo "$result"
+          if grep -q 'diff -u' <<< "$result"; then
+            exit 1
+          fi
 
       - name: Build
         run: make build
@@ -88,7 +90,8 @@ jobs:
       - name: Login to container registries
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          printf '%s' "$GITHUB_TOKEN" | docker login -u "$GITHUB_ACTOR" --password-stdin ghcr.io
+          printf '%s' "$GITHUB_TOKEN" | docker login \
+            -u "$GITHUB_ACTOR" --password-stdin ghcr.io
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
@@ -99,10 +102,10 @@ jobs:
           make release-vars > /tmp/spiffe-vault-release-vars.env
           source /tmp/spiffe-vault-release-vars.env
           if [[ -n "$LDFLAGS" ]]; then
-            echo "ldflags=$LDFLAGS" >> $GITHUB_OUTPUT
+            echo "ldflags=$LDFLAGS" >> "$GITHUB_OUTPUT"
           fi
           if [[ -n "$GIT_HASH" ]]; then
-            echo "git_hash=$GIT_HASH" >> $GITHUB_OUTPUT
+            echo "git_hash=$GIT_HASH" >> "$GITHUB_OUTPUT"
           fi
           rm -f /tmp/spiffe-vault-release-vars.env
 
@@ -115,11 +118,13 @@ jobs:
       - name: Buildx builder
         run: make container-builder
 
-      - name: Release ${{ (!startsWith(github.ref, 'refs/tags/') && 'snapshot') || '' }}
+      - name: Release
         uses: goreleaser/goreleaser-action@v6
         with:
           version: latest
-          args: release --clean ${{ (!startsWith(github.ref, 'refs/tags/') && '--snapshot') || '' }}
+          args: >-
+            release --clean
+            ${{ (!startsWith(github.ref, 'refs/tags/') && '--snapshot') || '' }}
         env:
           LDFLAGS: ${{ steps.release-vars.outputs.ldflags }}
           GIT_HASH: ${{ steps.release-vars.outputs.git_hash }}
@@ -129,11 +134,21 @@ jobs:
       - name: Get container info
         id: container_info
         if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
         run: |
-          export CONTAINER_DIGEST=$(make container-digest GITHUB_REF="$GITHUB_REF_NAME")
-          echo "container_digest=$CONTAINER_DIGEST" >> $GITHUB_OUTPUT
-          echo "container_tags=$(make container-tags CONTAINER_DIGEST="${CONTAINER_DIGEST}" | paste -s -d ',' -)" >> $GITHUB_OUTPUT
-          echo "container_repos=$(make container-repos CONTAINER_DIGEST="${CONTAINER_DIGEST}" | jq --raw-input . | jq --slurp -c)" >> $GITHUB_OUTPUT
+          CONTAINER_DIGEST="$(make container-digest \
+            "GITHUB_REF=$GITHUB_REF_NAME")"
+          CONTAINER_TAGS="$(make container-tags \
+            "CONTAINER_DIGEST=$CONTAINER_DIGEST" | paste -s -d ',' -)"
+          CONTAINER_REPOS="$(make container-repos \
+            "CONTAINER_DIGEST=$CONTAINER_DIGEST" | jq --raw-input . \
+            | jq --slurp -c)"
+          {
+            printf 'container_digest=%s\n' "$CONTAINER_DIGEST"
+            printf 'container_tags=%s\n' "$CONTAINER_TAGS"
+            printf 'container_repos=%s\n' "$CONTAINER_REPOS"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Logout from container registries
         if: ${{ always() }}
@@ -161,7 +176,9 @@ jobs:
         with:
           command: generate
           subcommand: github-release
-          arguments: --artifact-path release-assets --output-path provenance.att --tag-name ${{ github.ref_name }}
+          arguments: >-
+            --artifact-path release-assets --output-path provenance.att
+            --tag-name ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
@@ -173,12 +190,16 @@ jobs:
       - name: Sign provenance
         run: |
           printf '%s\n' "$COSIGN_PRIVATE_KEY" > cosign.key
-          cosign sign-blob --key cosign.key --output-signature "${SIGNATURE}" provenance.att
+          cosign sign-blob --key cosign.key \
+            --output-signature "${SIGNATURE}" provenance.att
           cat "${SIGNATURE}"
 
           curl_args=(-s -H "Authorization: token ${GITHUB_TOKEN}")
           curl_args+=(-H "Accept: application/vnd.github.v3+json")
-          release_id="$(curl "${curl_args[@]}" "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/releases?per_page=10" | jq "map(select(.name == \"${GITHUB_REF_NAME}\"))" | jq -r '.[0].id')"
+          releases_url="${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/releases?per_page=10"
+          releases="$(curl "${curl_args[@]}" "$releases_url")"
+          release_id="$(jq --arg tag "$GITHUB_REF_NAME" \
+            'map(select(.name == $tag)) | .[0].id' <<< "$releases")"
 
           echo "Upload ${SIGNATURE} to release with id ${release_id}…"
           curl_args+=(-H "Content-Type: $(file -b --mime-type "${SIGNATURE}")")
