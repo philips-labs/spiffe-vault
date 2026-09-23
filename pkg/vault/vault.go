@@ -28,7 +28,7 @@ func (c *Client) Authenticate(jwt, role string) error {
 		return fmt.Errorf("no jwt token provided to authenticate vault")
 	}
 
-	authData := map[string]interface{}{
+	authData := map[string]any{
 		"jwt":  jwt,
 		"role": role,
 	}
@@ -43,7 +43,7 @@ func (c *Client) Authenticate(jwt, role string) error {
 }
 
 // GetSecret reads a secret from the given path and key
-func (c *Client) GetSecret(path, key string) (map[string]interface{}, error) {
+func (c *Client) GetSecret(path, key string) (map[string]any, error) {
 	secret, err := c.Logical().Read(fmt.Sprintf("%s/data/%s", path, key))
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve secret with key '%s' from '%s': %w", key, path, err)

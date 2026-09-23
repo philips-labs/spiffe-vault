@@ -24,7 +24,7 @@ COMMANDS       := spiffe-vault
 GHCR_REPO := ghcr.io/philips-labs/spiffe-vault
 PLATFORMS ?= linux/amd64,linux/arm64
 DOCKER_HOST ?= unix:///var/run/docker.sock
-GO_VERSION ?= 1.22
+GO_VERSION ?= 1.27
 
 .PHONY: help
 help:
